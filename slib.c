@@ -83,6 +83,12 @@ gjc@world.std.com
 #define sprintf_s snprintf
 #endif
 
+_Static_assert(sizeof(LISP) == sizeof(void *),
+    "LISP must be a plain pointer: GC uses pointer arithmetic on heap arrays");
+_Static_assert(sizeof(struct obj) >= sizeof(LISP),
+    "GC forwarding pointer must fit within a heap cell");
+_Static_assert(sizeof(struct obj) >= 2 * sizeof(short),
+    "GC header (gc_mark + type) requires at least two short fields");
 
 static void init_slib_version(void)
 {setvar(cintern("*slib-version*"),
