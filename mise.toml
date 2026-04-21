@@ -1,0 +1,3 @@
+[tools]
+meson = "latest"
+ninja = "latest"
