@@ -1069,35 +1069,41 @@ void init_storage_1(void)
 void init_subr(char *name, long type, SUBR_FUNC fcn)
 {setvar(cintern(name),subrcons(type,name,fcn),NIL);}
 
+#define INIT_SUBR(_type,_field,_name,_fcn) \
+ {LISP _z; NEWCELL(_z,_type);              \
+  (*_z).storage_as._field.name = (_name);  \
+  (*_z).storage_as._field.f   = (_fcn);    \
+  setvar(cintern(_name),_z,NIL);}
+
 void init_subr_0(char *name, LISP (*fcn)(void))
-{init_subr(name,tc_subr_0,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_0, subr0, name, fcn)
 
 void init_subr_1(char *name, LISP (*fcn)(LISP))
-{init_subr(name,tc_subr_1,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_1, subr1, name, fcn)
 
 void init_subr_2(char *name, LISP (*fcn)(LISP,LISP))
-{init_subr(name,tc_subr_2,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_2, subr2, name, fcn)
 
 void init_subr_2n(char *name, LISP (*fcn)(LISP,LISP))
-{init_subr(name,tc_subr_2n,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_2n, subr2, name, fcn)
 
 void init_subr_3(char *name, LISP (*fcn)(LISP,LISP,LISP))
-{init_subr(name,tc_subr_3,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_3, subr3, name, fcn)
 
 void init_subr_4(char *name, LISP (*fcn)(LISP,LISP,LISP,LISP))
-{init_subr(name,tc_subr_4,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_4, subr4, name, fcn)
 
 void init_subr_5(char *name, LISP (*fcn)(LISP,LISP,LISP,LISP,LISP))
-{init_subr(name,tc_subr_5,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_subr_5, subr5, name, fcn)
 
 void init_lsubr(char *name, LISP (*fcn)(LISP))
-{init_subr(name,tc_lsubr,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_lsubr, subr1, name, fcn)
 
 void init_fsubr(char *name, LISP (*fcn)(LISP,LISP))
-{init_subr(name,tc_fsubr,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_fsubr, subr2, name, fcn)
 
 void init_msubr(char *name, LISP (*fcn)(LISP *,LISP *))
-{init_subr(name,tc_msubr,(SUBR_FUNC)fcn);}
+INIT_SUBR(tc_msubr, subrm, name, fcn)
 
 LISP assq(LISP x,LISP alist)
 {LISP l,tmp;
