@@ -664,7 +664,7 @@ LISP cpu_usage_limits(LISP soft,LISP hard)
 
 static int handle_sigalrm_flag = 0;
 
-void handle_sigalrm(int sig)
+void handle_sigalrm([[maybe_unused]] int sig)
 {if (nointerrupt == 1)
   {if (handle_sigalrm_flag)
     /* If we were inside a system call then it would be

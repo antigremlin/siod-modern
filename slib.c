@@ -287,7 +287,7 @@ long no_interrupt(long n)
     err_ctrl_c();}
  return(x);}
 
-void handle_sigfpe(int sig SIG_restargs)
+void handle_sigfpe([[maybe_unused]] int sig SIG_restargs)
 {
 #ifdef WIN32
  _fpreset();
@@ -295,7 +295,7 @@ void handle_sigfpe(int sig SIG_restargs)
  signal(SIGFPE,handle_sigfpe);
  err("floating point exception",NIL);}
 
-void handle_sigint(int sig SIG_restargs)
+void handle_sigint([[maybe_unused]] int sig SIG_restargs)
 {signal(SIGINT,handle_sigint);
 #if defined(WIN32)
    interrupt_differed = 1;
@@ -363,7 +363,7 @@ long repl_driver(long want_sigint,long want_init,struct repl_hooks *h)
  stack_limit_ptr = NULL;
  return(rv);}
 
-static void ignore_puts(char *st)
+static void ignore_puts([[maybe_unused]] char *st)
 {}
 
 static void noprompt_puts(char *st)
@@ -385,7 +385,7 @@ static LISP repl_c_string_read(void)
  if (repl_c_string_out) repl_c_string_out[0] = 0;
  return(read_from_string(s));}
 
-static void ignore_print(LISP x)
+static void ignore_print([[maybe_unused]] LISP x)
 {repl_c_string_flag = 1;}
 
 static void not_ignore_print(LISP x)
@@ -688,7 +688,7 @@ static long inside_err = 0;
 LISP errswitch(void)
 {return(err("BUG. Reached impossible case",NIL));}
 
-void err_stack(char *ptr)
+void err_stack([[maybe_unused]] char *ptr)
      /* The user could be given an option to continue here */
 {err("the currently assigned stack limit has been exceded",NIL);}
 
@@ -1971,10 +1971,10 @@ LISP let_macro(LISP form)
  setcar(form,cintern("let-internal"));
  return(form);}
    
-LISP leval_quote(LISP args,LISP env)
+LISP leval_quote(LISP args,[[maybe_unused]] LISP env)
 {return(car(args));}
 
-LISP leval_tenv(LISP args,LISP env)
+LISP leval_tenv([[maybe_unused]] LISP args,LISP env)
 {return(env);}
 
 LISP leval_while(LISP args,LISP env)
@@ -2614,7 +2614,7 @@ char *safe_strcat(char *s1,size_t size1,const char *s2)
  safe_strcpy(&s1[len1],size1 - len1,s2);
  return(s1);}
 
-static LISP parser_read(LISP ignore)
+static LISP parser_read([[maybe_unused]] LISP ignore)
 {return(leval(cintern("read"),NIL));}
 
 static LISP os_classification(void)

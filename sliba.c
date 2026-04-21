@@ -183,7 +183,7 @@ int rfs_getc(unsigned char **p)
  *p = *p + 1;
  return(i);}
 
-void rfs_ungetc(unsigned char c,unsigned char **p)
+void rfs_ungetc([[maybe_unused]] unsigned char c,unsigned char **p)
 {*p = *p - 1;}
 
 LISP read_from_string(LISP x)
@@ -1824,7 +1824,7 @@ LISP getprop(LISP plist,LISP key)
      INTERRUPT_CHECK();
  return(NIL);}
 
-LISP setprop(LISP plist,LISP key,LISP value)
+LISP setprop([[maybe_unused]] LISP plist,[[maybe_unused]] LISP key,[[maybe_unused]] LISP value)
 {err("not implemented",NIL);
  return(NIL);}
 
@@ -2007,7 +2007,7 @@ LISP set_eval_history(LISP len,LISP circ)
  setvar(cintern("*eval-history*"),data,NIL);
  return(len);}
 
-static LISP parser_fasl(LISP ignore)
+static LISP parser_fasl([[maybe_unused]] LISP ignore)
 {return(closure(listn(3,
 		      NIL,
 		      cons_array(flocons(100),NIL),
