@@ -1,1 +1,2 @@
-/.cache/clangd/index
+.cache/clangd/index
+build
