@@ -18,8 +18,8 @@ extern LISP sym_t;
 
 extern long siod_verbose_level;
 extern char *siod_lib;
-extern long nointerrupt;
-extern long interrupt_differed;
+extern _Atomic int nointerrupt;
+extern _Atomic int interrupt_differed;
 extern long errjmp_ok;
 extern LISP unbound_marker;
 
