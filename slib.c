@@ -2338,7 +2338,7 @@ LISP vload(char *ofname,long cflag,long rflag)
  c = getc(f);
  while((c == '#') || (c == ';'))
    {while(((c = getc(f)) != EOF) && (c != '\n'))
-      if ((j+1)<sizeof(buffer))
+      if ((size_t)(j+1)<sizeof(buffer))
 	{buffer[j] = c;
 	 buffer[++j] = 0;}
     if (c == '\n')

@@ -1444,7 +1444,7 @@ LISP lgets(LISP file,LISP buffn)
    n = sizeof(buffer);
  else if ((n = get_c_long(buffn)) < 0)
    err("size must be >= 0",buffn);
- else if (n > sizeof(buffer))
+ else if (n > (long)sizeof(buffer))
    err("not handling buffer of size",listn(2,buffn,flocons(sizeof(buffer))));
  iflag = no_interrupt(1);
  if ((ptr = fgets(buffer,n,f)))

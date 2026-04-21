@@ -1258,7 +1258,7 @@ static void init_base64_table(void)
  base64_decode_table = (char *) malloc(256);
  memset(base64_decode_table,-1,256);
  for(j=0;j<65;++j)
-   base64_decode_table[base64_encode_table[j]] = j;}
+   base64_decode_table[(unsigned char)base64_encode_table[j]] = j;}
 
 #define BITMSK(N) ((1 << (N)) - 1)
 
