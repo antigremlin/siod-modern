@@ -79,7 +79,7 @@ gjc@world.std.com
 #include "siod.h"
 #include "siodp.h"
 
-#ifdef linux
+#ifndef WIN32
 #define sprintf_s snprintf
 #endif
 
@@ -174,7 +174,7 @@ char *siod_lib = SIOD_LIB_DEFAULT;
 void __stdcall process_cla(int argc,char **argv,int warnflag)
 {int k;
  char *ptr;
- static siod_lib_set = 0;
+ static int siod_lib_set = 0;
  char msgbuff[256];
 #if !defined(vms)
  if (!siod_lib_set)

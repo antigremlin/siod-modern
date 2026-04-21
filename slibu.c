@@ -66,8 +66,9 @@
 #include <crypt.h>
 #endif
 
-#if defined(sgi)
+#if defined(sgi) || defined(__APPLE__)
 #include <limits.h>
+#include <dlfcn.h>
 #endif
 
 #if defined(hpux)
@@ -288,6 +289,7 @@ LISP lsetpwfile(LISP fname)
  return(NIL);}
 #endif
 
+#ifdef linux
 LISP lputpwent(LISP alist,LISP file)
 {int iflag = no_interrupt(1);
  int status;
@@ -296,6 +298,7 @@ LISP lputpwent(LISP alist,LISP file)
  status = putpwent(&p,get_c_file(file,NULL));
  no_interrupt(iflag);
  return(NIL);}
+#endif
 
 LISP laccess_problem(LISP lfname,LISP lacc)
 {char *fname = get_c_string(lfname);
@@ -2211,7 +2214,9 @@ void __stdcall init_slibu(void)
 #if defined(__osf__)
  init_subr_1("setpwfile",lsetpwfile);
 #endif
+#ifdef linux
  init_subr_2("putpwent",lputpwent);
+#endif
  init_subr_2("access-problem?",laccess_problem);
  init_subr_3("utime",lutime);
  init_subr_2("fchmod",lfchmod);
