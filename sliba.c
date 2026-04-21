@@ -186,12 +186,18 @@ int rfs_getc(unsigned char **p)
 void rfs_ungetc([[maybe_unused]] unsigned char c,unsigned char **p)
 {*p = *p - 1;}
 
+static int rfs_getc_cb(void *p)
+{return rfs_getc((unsigned char **)p);}
+
+static void rfs_ungetc_cb(int c, void *p)
+{rfs_ungetc((unsigned char)c, (unsigned char **)p);}
+
 LISP read_from_string(LISP x)
 {char *p;
  struct gen_readio s;
  p = get_c_string(x);
- s.getc_fcn = (int (*)(void *))rfs_getc;
- s.ungetc_fcn = (void (*)(int,void *))rfs_ungetc;
+ s.getc_fcn = rfs_getc_cb;
+ s.ungetc_fcn = rfs_ungetc_cb;
  s.cb_argument = (char *) &p;
  return(readtl(&s));}
 
