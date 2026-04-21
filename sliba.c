@@ -1469,10 +1469,10 @@ LISP butlast(LISP l)
  STACK_CHECK(&l);
  if NULLP(l) err("list is empty",l);
  if CONSP(l)
-   if NULLP(CDR(l))
+   {if NULLP(CDR(l))
      return(NIL);
    else
-     return(cons(CAR(l),butlast(CDR(l))));
+     return(cons(CAR(l),butlast(CDR(l))));}
  return(err("not a list",l));}
 
 LISP nconc(LISP a,LISP b)

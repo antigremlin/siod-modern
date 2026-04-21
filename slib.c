@@ -1452,7 +1452,7 @@ void gc_sweep(void)
      {org = heaps[k];
       end = org + heap_size;
       for(ptr=org; ptr < end; ++ptr)
-	if (((*ptr).gc_mark == 0))
+	if ((*ptr).gc_mark == 0)
 	  {switch((*ptr).type)
 	     {case tc_free_cell:
 	      case tc_cons:
@@ -1495,7 +1495,7 @@ LISP user_gc(LISP args)
  errjmp_ok = 0;
  old_status_flag = gc_status_flag;
  if NNULLP(args)
-   if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;
+   {if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;}
  gc_mark_and_sweep();
  gc_status_flag = old_status_flag;
  errjmp_ok = 1;
@@ -1516,8 +1516,8 @@ long freelist_length(void)
  
 LISP gc_status(LISP args)
 {long n,m;
- if NNULLP(args) 
-   if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;
+ if NNULLP(args)
+   {if NULLP(car(args)) gc_status_flag = 0; else gc_status_flag = 1;}
  if (gc_kind_copying == 1)
    {if (gc_status_flag)
       put_st("garbage collection is on\n");
@@ -2128,7 +2128,7 @@ int flush_ws(struct gen_readio *f,char *eoferr)
  commentp = 0;
  while(1)
    {c = GETC_FCN(f);
-    if (c == EOF) if (eoferr) err(eoferr,NIL); else return(c);
+    if (c == EOF) {if (eoferr) err(eoferr,NIL); else return(c);}
     if (commentp) {if (c == '\n') commentp = 0;}
     else if (c == ';') commentp = 1;
     else if (!isspace(c)) return(c);}}
