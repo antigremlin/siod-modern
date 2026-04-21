@@ -1123,18 +1123,18 @@ LISP number2string(LISP x,LISP b,LISP w,LISP p)
    {if ((width >= 0) && (prec >= 0))
       sprintf(buffer,
 	      NULLP(b) ? "% *.*g" : EQ(sym_e,b) ? "% *.*e" : "% *.*f",
-	      width,
-	      prec,
+	      (int)width,
+	      (int)prec,
 	      y);
     else if (width >= 0)
       sprintf(buffer,
 	      NULLP(b) ? "% *g" : EQ(sym_e,b) ? "% *e" : "% *f",
-	      width,
+	      (int)width,
 	      y);
     else if (prec >= 0)
       sprintf(buffer,
 	      NULLP(b) ? "%.*g" : EQ(sym_e,b) ? "%.*e" : "%.*f",
-	      prec,
+	      (int)prec,
 	      y);
     else
       sprintf(buffer,
@@ -1144,7 +1144,7 @@ LISP number2string(LISP x,LISP b,LISP w,LISP p)
    {if (width >= 0)
       sprintf(buffer,
 	      (base == 10) ? "%0*ld" : (base == 8) ? "%0*lo" : "%0*lX",
-	      width,
+	      (int)width,
 	      (long) y);
     else
       sprintf(buffer,
@@ -1686,7 +1686,7 @@ LISP fast_save(LISP fname,LISP forms,LISP nohash,LISP comment,LISP fmode)
    fput_st(f,get_c_string(comment));
  sprintf(msgbuff,"# Siod Binary Object Save File\n");
  fput_st(f,msgbuff);
- sprintf(msgbuff,"# sizeof(long) = %d\n# sizeof(double) = %d\n",
+ sprintf(msgbuff,"# sizeof(long) = %zu\n# sizeof(double) = %zu\n",
 	 sizeof(long),sizeof(double));
  fput_st(f,msgbuff);
  shexstr(databuff,&l_one,sizeof(l_one));

@@ -392,8 +392,8 @@ LISP lrandom(LISP n)
 #if defined(hpux) || defined(vms) || defined(sun) || defined(sgi) || defined(WIN32)
  res = rand();
 #endif
-#if defined(__osf__) || defined(linux)
- res = random();
+#if defined(__osf__) || defined(linux) || defined(__APPLE__)
+ res = (int)random();
 #endif
  return(flocons(NNULLP(n) ? res % get_c_long(n) : res));}
 
