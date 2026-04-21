@@ -97,7 +97,7 @@ double myruntime(void);
 void fput_st(FILE *f,char *st);
 void put_st(char *st);
 void grepl_puts(char *,void (*)(char *));
-void gc_fatal_error(void);
+[[noreturn]] void gc_fatal_error(void);
 LISP gen_intern(char *name,long copyp);
 void scan_registers(void);
 void init_storage_1(void);

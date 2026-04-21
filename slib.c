@@ -637,7 +637,7 @@ void set_fatal_exit_hook(void (*fcn)(void))
 
 static long inside_err = 0;
 
-LISP err(const char *message, LISP x)
+[[noreturn]] LISP err(const char *message, LISP x)
 {struct catch_frame *l;
  long was_inside = inside_err;
  LISP retval,nx;
@@ -683,9 +683,7 @@ LISP err(const char *message, LISP x)
    put_st("FATAL ERROR DURING STARTUP OR CRITICAL CODE SECTION\n");
  if (fatal_exit_hook)
    (*fatal_exit_hook)();
- else
-   exit(10);
- return(NIL);}
+ exit(10);}
 
 LISP errswitch(void)
 {return(err("BUG. Reached impossible case",NIL));}
@@ -746,7 +744,7 @@ LISP lerr(LISP message, LISP x)
    err(get_c_string(message),x);
  return(NIL);}
 
-void gc_fatal_error(void)
+[[noreturn]] void gc_fatal_error(void)
 {err("ran out of storage",NIL);}
 
 LISP newcell(long type)
@@ -2407,8 +2405,8 @@ LISP save_forms(LISP fname,LISP forms,LISP how)
    put_st("done.\n");
  return(sym_t);}
 
-LISP quit(void)
-{return(err(NULL,NIL));}
+[[noreturn]] LISP quit(void)
+{err(NULL,NIL);}
 
 LISP nullp(LISP x)
 {if EQ(x,NIL) return(sym_t); else return(NIL);}

@@ -177,7 +177,7 @@ void set_repl_hooks(void (*puts_f)(char *),
 		    LISP (*eval_f)(LISP),
 		    void (*print_f)(LISP));
 long repl(struct repl_hooks *);
-LISP err(const char *message, LISP x);
+[[noreturn]] LISP err(const char *message, LISP x);
 LISP errswitch(void);
 char *get_c_string(LISP x);
 char *get_c_string_dim(LISP x,long *);
@@ -259,7 +259,7 @@ LISP vload(char *fname,long cflag,long rflag);
 LISP load(LISP fname,LISP cflag,LISP rflag);
 LISP require(LISP fname);
 LISP save_forms(LISP fname,LISP forms,LISP how);
-LISP quit(void);
+[[noreturn]] LISP quit(void);
 LISP nullp(LISP x);
 LISP strcons(long length,const char *data);
 LISP read_from_string(LISP x);
