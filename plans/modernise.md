@@ -2,12 +2,12 @@
 
 ## Tracker
 
-- [ ] `[[noreturn]]` on `err()`, `gc_fatal_error()`, `quit()`
-- [ ] `<stdint.h>` — replace `long`-as-integer and hand-rolled `UINT4` with `uint32_t`, `size_t`, etc.
-- [ ] `_Atomic` on signal-handler globals (`nointerrupt`, `interrupt_differed`)
-- [ ] Fix `SUBR_FUNC` cast UB — store function pointers directly into typed union fields
-- [ ] `[[maybe_unused]]` on required-but-unused parameters (signal handlers, stubs)
-- [ ] `_Static_assert` on GC layout invariants
+- [x] `[[noreturn]]` on `err()`, `gc_fatal_error()`, `quit()`
+- [x] `<stdint.h>` — replace hand-rolled `UINT4`/`UINT2` in md5.h with `uint32_t`/`uint16_t`
+- [x] `_Atomic` on signal-handler globals (`nointerrupt`, `interrupt_differed`)
+- [x] Fix `SUBR_FUNC` cast UB — store function pointers directly into typed union fields
+- [x] `[[maybe_unused]]` on required-but-unused parameters (signal handlers, stubs)
+- [x] `_Static_assert` on GC layout invariants
 
 ---
 
