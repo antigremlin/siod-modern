@@ -167,7 +167,9 @@ LISP strcons(long length,const char *data)
  flag = no_interrupt(1);
  s = cons(NIL,NIL);
  s->type = tc_string;
- if (length < 0) length = strlen(data);
+ if (length < 0)
+   {if (!data) err("null string data",NIL);
+    length = strlen(data);}
  s->storage_as.string.data = must_malloc(length+1);
  s->storage_as.string.dim = length;
  if (data)
@@ -2144,4 +2146,3 @@ void init_subrs_a(void)
  setvar(cintern("*parser_fasl.scm-loaded*"),a_true_value(),NIL);
  init_subr_2("parser_fasl_hook",parser_fasl_hook);
  init_sliba_version();}
-
