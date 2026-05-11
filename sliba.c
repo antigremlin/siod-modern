@@ -1638,7 +1638,9 @@ LISP listn(long n, ...)
  for(j=0,result=NIL;j<n;++j)  result = cons(NIL,result);
  va_start(args,n);
  for(j=0,ptr=result;j<n;ptr=cdr(ptr),++j)
+   /* NOLINTNEXTLINE(clang-analyzer-security.VAList): va_start is above; analyzer loses that across the preallocation loop. */
    setcar(ptr,va_arg(args,LISP));
+ /* NOLINTNEXTLINE(clang-analyzer-security.VAList): paired with va_start above. */
  va_end(args);
  return(result);}
 

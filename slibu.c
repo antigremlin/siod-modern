@@ -475,6 +475,7 @@ int assemble_options(LISP l, ...)
  if NULLP(l) return(0);
  noptions = CONSP(l) ? get_c_long(llength(l)) : -1;
  va_start(syms,l);
+ /* NOLINTNEXTLINE(clang-analyzer-security.VAList): va_start is above; analyzer loses it through SIOD macros. */
  while((sym = va_arg(syms,char *)))
    {val = va_arg(syms,int);
     lsym = cintern(sym);
@@ -1693,6 +1694,7 @@ LISP symalist(char *arg,...)
  char *key;
  if (!arg) return(NIL);
  va_start(args,arg);
+ /* NOLINTNEXTLINE(clang-analyzer-security.VAList): va_start is above; analyzer loses it through SIOD macros. */
  val = va_arg(args,LISP);
  result = cons(cons(cintern(arg),val),NIL);
  l = result;
