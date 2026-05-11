@@ -403,7 +403,7 @@ LISP lsrandom(LISP n)
 #if defined(hpux) || defined(vms) || defined(sun) || defined(sgi) || defined(WIN32)
  srand(seed);
 #endif
-#if defined(__osf__) || defined(linux)
+#if defined(__osf__) || defined(linux) || defined(__APPLE__)
  srandom(seed);
 #endif
  return(NIL);}
@@ -1939,9 +1939,8 @@ LISP mkdatref(LISP ctype,LISP ind)
 		leval(cintern("sdatref"),NIL)));}
 
 LISP datlength(LISP dat,LISP ctype)
-{char *data;
- long size;
- data = get_c_string_dim(dat,&size);
+{long size;
+ get_c_string_dim(dat,&size);
  switch(get_c_long(ctype))
    {case CTYPE_FLOAT:
       return(flocons(size / sizeof(float)));

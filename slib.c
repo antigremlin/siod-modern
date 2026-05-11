@@ -2108,10 +2108,15 @@ LISP lread(LISP f)
 {return(lreadf(get_c_file(f,stdin)));}
 
 int f_getc(FILE *f)
-{long iflag,dflag;
+{long iflag;
+#ifdef VMS
+ long dflag;
+#endif
  int c;
  iflag = no_interrupt(1);
+#ifdef VMS
  dflag = interrupt_differed;
+#endif
  c = getc(f);
 #ifdef VMS
  if ((dflag == 0) & interrupt_differed & (f == stdin))
@@ -2749,5 +2754,4 @@ void pr(LISP p)
 void prp(LISP *p)
 {if (!p) return;
  pr(*p);}
-
 
