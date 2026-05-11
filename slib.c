@@ -1296,7 +1296,7 @@ LISP allocate_aheap(void)
 	   {CDR(ptr) = freelist;
 	    break;}}
       freelist = heaps[j];
-      flag = no_interrupt(flag);
+      no_interrupt(flag);
       return(sym_t);}
  return(NIL);}
 
@@ -1441,15 +1441,15 @@ void mark_locations_array(LISP *x,long n)
       gc_mark(p);}}
 
 void gc_sweep(void)
-{LISP ptr,end,nfreelist,org;
+{LISP ptr,nfreelist,org;
  long n,k;
  struct user_type_hooks *p;
- end = heap_end;
  n = 0;
  nfreelist = NIL;
  for(k=0;k<nheaps;++k)
    if (heaps[k])
-     {org = heaps[k];
+     {LISP end;
+      org = heaps[k];
       end = org + heap_size;
       for(ptr=org; ptr < end; ++ptr)
 	if ((*ptr).gc_mark == 0)

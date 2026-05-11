@@ -564,9 +564,8 @@ LISP lmemref_byte(LISP addr)
  return(flocons(*ptr));}
 
 LISP lexit(LISP val)
-{int iflag = no_interrupt(1);
+{no_interrupt(1);
  exit(get_c_long(val));
- no_interrupt(iflag);
  return(NIL);}
 
 LISP ltrunc(LISP x)
@@ -1439,7 +1438,7 @@ LISP lgets(LISP file,LISP buffn)
 {FILE *f;
  int iflag;
  long n;
- char buffer[2048],*ptr;
+ char buffer[2048];
  f = get_c_file(file,stdin);
  if NULLP(buffn)
    n = sizeof(buffer);
@@ -1448,7 +1447,7 @@ LISP lgets(LISP file,LISP buffn)
  else if (n > (long)sizeof(buffer))
    err("not handling buffer of size",listn(2,buffn,flocons(sizeof(buffer))));
  iflag = no_interrupt(1);
- if ((ptr = fgets(buffer,n,f)))
+ if (fgets(buffer,n,f))
    {no_interrupt(iflag);
     return(strcons(strlen(buffer),buffer));}
  no_interrupt(iflag);
