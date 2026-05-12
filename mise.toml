@@ -2,6 +2,10 @@
 meson = "latest"
 ninja = "latest"
 
-[shell_alias]
-clang-format = "/opt/homebrew/opt/llvm/bin/clang-format"
-clang-tidy = "/opt/homebrew/opt/llvm/bin/clang-tidy"
+[env]
+_.path = "/opt/homebrew/opt/llvm/bin"
+_.source = "vars.sh"
+
+# [shell_alias]
+# clang-format = "/opt/homebrew/opt/llvm/bin/clang-format"
+# clang-tidy = "/opt/homebrew/opt/llvm/bin/clang-tidy"
