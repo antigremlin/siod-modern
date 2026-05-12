@@ -2019,7 +2019,8 @@ int __stdcall siod_main(int argc,char **argv, char **env)
 	   {put_st("Content-type: text/plain\r\n\r\n");
 	    text_plain_flag = 1;}
 	 if ((strncmp(iargv[1],"-m",2) == 0))
-	   mainflag = atol(&iargv[1][2]);
+	   {mainflag = atol(&iargv[1][2]);
+	    free(iargv[1]);}
 	 else
 	   process_cla(2,iargv,1);
 	 /* Note: Not doing free(iargv[1]); */
