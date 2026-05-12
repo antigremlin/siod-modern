@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clang-Tidy Session Report</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --text: #202124;
+      --muted: #5f6368;
+      --border: #dadce0;
+      --accent: #1769aa;
+      --bg: #ffffff;
+      --soft: #f7f9fb;
+    }
+    body {
+      margin: 0;
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 40px;
+    }
+    header {
+      grid-column: 1 / -1;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+    h2 {
+      margin: 36px 0 12px;
+      padding-top: 8px;
+      font-size: 24px;
+      border-top: 1px solid var(--border);
+    }
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+    }
+    p {
+      margin: 0 0 14px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    pre {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: auto;
+      background: var(--soft);
+    }
+    nav {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--soft);
+    }
+    nav h2 {
+      border: 0;
+      margin: 0 0 10px;
+      padding: 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    nav a {
+      display: block;
+      color: var(--accent);
+      text-decoration: none;
+      margin: 8px 0;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      min-width: 0;
+    }
+    .meta {
+      color: var(--muted);
+      margin: 0;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--soft);
+      padding: 12px 14px;
+      margin: 18px 0;
+    }
+    ul {
+      padding-left: 22px;
+    }
+    li {
+      margin: 7px 0;
+    }
+    @media (max-width: 820px) {
+      .page {
+        display: block;
+      }
+      nav {
+        position: static;
+        margin: 24px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Clang-Tidy Session Report</h1>
+      <p class="meta">Date: 2026-05-12</p>
+      <p class="meta">Range covered: <code>0bf036f011d90562d0abe4267f00ead0f5ad8d86^..HEAD</code></p>
+      <p class="meta">Excluded: <code>58f614f set tabsize for old C code</code>, which only touched <code>.zed/settings.json</code>.</p>
+    </header>
+
+    <nav aria-label="Section navigation">
+      <h2>Sections</h2>
+      <a href="#summary">Summary</a>
+      <a href="#setup">Clang-Tidy Setup</a>
+      <a href="#fixes">Warning Fixes</a>
+      <a href="#other-changes">Other Changes</a>
+      <a href="#verification">Verification</a>
+      <a href="#commits">Commits Covered</a>
+    </nav>
+
+    <main>
+      <section id="summary">
+        <h2>Summary</h2>
+        <p>This session introduced clang-tidy support for the SIOD modernization work, connected it to Meson's built-in clang-tidy target, and fixed the most useful warnings found so far. The repo now uses Meson's auto-generated <code>clang-tidy</code> and <code>clang-tidy-fix</code> targets rather than a project-local custom target.</p>
+        <p>The current clang-tidy run completes successfully under <code>mise exec -- ninja -C build clang-tidy</code>. It still reports analyzer warnings in MD5 and GC-related code, plus one GC hook dead-store warning that was intentionally left for a separate semantic pass.</p>
+      </section>
+
+      <section id="setup">
+        <h2>Clang-Tidy Setup</h2>
+
+        <h3>Configuration</h3>
+        <p>Added <code>.clang-tidy</code> with compiler diagnostics and Clang Static Analyzer checks enabled, while keeping two noisy legacy C insecure API checks disabled for now.</p>
+        <pre><code class="language-yaml">---
+Checks: &gt;
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -clang-analyzer-security.insecureAPI.rand
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle: none</code></pre>
+        <p><code>FormatStyle: none</code> keeps clang-tidy from driving formatting changes while clang-format policy is still being decided.</p>
+
+        <h3>Meson Integration</h3>
+        <p>Meson automatically creates <code>clang-tidy</code> and <code>clang-tidy-fix</code> targets when <code>clang-tidy</code> is on <code>PATH</code> at setup time, the source root contains <code>.clang-tidy</code>, and the project does not define its own target.</p>
+        <pre><code class="language-meson">project('siod', 'c',
+  version : '3.6',
+  meson_version : '&gt;=1.9.0',
+  default_options : [
+    'c_std=c23',
+    'warning_level=2',
+    'buildtype=debugoptimized',
+  ],
+)</code></pre>
+        <p>The <code>&gt;=1.9.0</code> floor both removes Meson's minimum-version warning and matches the version where Meson's auto-generated clang-tidy target correctly selects only source files participating in build targets.</p>
+
+        <h3>Mise and Homebrew LLVM</h3>
+        <p>Homebrew LLVM is keg-only and lives at <code>/opt/homebrew/opt/llvm/bin</code>. The project-level mise configuration adds that directory to the mise execution environment.</p>
+        <pre><code class="language-toml">[env]
+_.path = "/opt/homebrew/opt/llvm/bin"
+_.source = "vars.sh"</code></pre>
+        <p>The earlier shell-alias approach was not enough for Meson. Shell aliases work interactively, but Meson and Ninja need a real executable on <code>PATH</code>.</p>
+        <pre><code class="language-shell">mise exec -- meson setup build
+mise exec -- ninja -C build clang-tidy</code></pre>
+
+        <h3>macOS SDK Details</h3>
+        <p>Homebrew <code>clang-tidy</code> needs Apple's SDK path to find system headers such as <code>stdio.h</code>. The project now sources <code>vars.sh</code>.</p>
+        <pre><code class="language-shell">if [ "$(uname -s)" = "Darwin" ] &amp;&amp; command -v xcrun &gt;/dev/null 2&gt;&amp;1; then
+  export SDKROOT="${SDKROOT:-$(xcrun --show-sdk-path)}"
+fi</code></pre>
+        <p>The normal build still uses Apple clang through <code>/usr/bin/cc</code>; Homebrew LLVM is used for <code>clang-tidy</code> and <code>clang-format</code>.</p>
+
+        <h3>Homebrew LLVM Coexistence Recommendation</h3>
+        <div class="note">
+          <p>Preferred longer-term setup: create a small project-local shim directory that exposes only <code>clang-tidy</code> and <code>clang-format</code>, then add that shim directory to <code>PATH</code>. That avoids shadowing Apple's <code>clang</code> while still letting Meson discover clang-tidy automatically.</p>
+        </div>
+        <p>The current setup is acceptable because Meson is compiling with <code>cc</code>, which resolves to <code>/usr/bin/cc</code>, while Homebrew <code>clang-tidy</code> only analyzes the compile database.</p>
+      </section>
+
+      <section id="fixes">
+        <h2>Warning Fixes</h2>
+
+        <h3>Null Inferred String Length</h3>
+        <p><strong>Commit:</strong> <code>11bbd19 Guard strcons against null inferred length</code></p>
+        <p><code>strcons()</code> previously called <code>strlen(data)</code> whenever <code>length &lt; 0</code>. The function now reports an error before attempting to infer length from a null pointer.</p>
+
+        <h3>Unused Dead Stores</h3>
+        <p><strong>Commit:</strong> <code>3005f6c Remove unused dead stores</code></p>
+        <ul>
+          <li><code>f_getc()</code> now keeps <code>dflag</code> only for the VMS-only path that uses it.</li>
+          <li><code>lsrandom()</code> now uses the <code>seed</code> value on macOS via <code>srandom(seed)</code>.</li>
+          <li><code>datlength()</code> still calls <code>get_c_string_dim(dat, &amp;size)</code> for validation and side effects, but no longer stores the unused returned data pointer.</li>
+        </ul>
+
+        <h3>Varargs Analyzer False Positives</h3>
+        <p><strong>Commit:</strong> <code>ba886d0 Document varargs analyzer false positives</code></p>
+        <p>Added targeted <code>NOLINTNEXTLINE(clang-analyzer-security.VAList)</code> comments at <code>listn</code>, <code>assemble_options</code>, and <code>symalist</code>. A helper-function refactor was explored, but clang-tidy still reported the warning, so targeted suppressions were chosen.</p>
+
+        <h3>Local Analyzer Dead Stores</h3>
+        <p><strong>Commit:</strong> <code>3b30052 Clean up local analyzer dead stores</code></p>
+        <ul>
+          <li><code>allocate_aheap()</code> now restores interrupt state without assigning the unused return value.</li>
+          <li><code>gc_sweep()</code> moved <code>end</code> into the inner heap scope.</li>
+          <li><code>lexit()</code> keeps interrupts disabled before <code>exit()</code> and removes the unreachable restore assignment.</li>
+          <li><code>lgets()</code> removes a leftover <code>ptr</code> variable and checks <code>fgets()</code> directly.</li>
+        </ul>
+
+        <h3>Command-Line Option Leak</h3>
+        <p><strong>Commit:</strong> <code>a8c57a8 Free temporary -m argument in siod_main</code></p>
+        <p>The analyzer-reported leak was real for the <code>-m...</code> path. The temporary split argument was allocated, used locally to set <code>mainflag</code>, and never passed to <code>process_cla()</code>.</p>
+        <pre><code class="language-c">if ((strncmp(iargv[1],"-m",2) == 0))
+  {mainflag = atol(&amp;iargv[1][2]);
+   free(iargv[1]);}
+else
+  process_cla(2,iargv,1);</code></pre>
+        <p>The other path still intentionally does not free <code>iargv[1]</code>, because <code>process_cla()</code> can store pointers into that string for options such as <code>-l...</code> and <code>-i...</code>.</p>
+      </section>
+
+      <section id="other-changes">
+        <h2>Other Changes</h2>
+        <p><strong>Commit:</strong> <code>0bf036f Add clang-tidy config and LLVM aliases</code></p>
+        <p>Introduced the first clang-tidy configuration and Homebrew LLVM command discovery setup.</p>
+        <p><strong>Commit:</strong> <code>0250741 Add Meson version floor and macOS clang-tidy SDKROOT setup</code></p>
+        <p>Added <code>meson_version : '&gt;=1.9.0'</code>, moved from aliases toward a real mise environment path, and added macOS SDK discovery through <code>vars.sh</code>.</p>
+      </section>
+
+      <section id="verification">
+        <h2>Verification</h2>
+        <p>The following commands pass:</p>
+        <pre><code class="language-shell">mise exec -- ninja -C build
+mise exec -- ninja -C build clang-tidy</code></pre>
+        <p>The current clang-tidy invocation exits <code>0</code>.</p>
+        <p>Remaining warnings at the end of the session:</p>
+        <ul>
+          <li><code>md5.c:140</code> and <code>md5.c:149</code>: analyzer reports possible out-of-bounds access around MD5 padding.</li>
+          <li><code>slib.c:623</code>: possible null-pointer subtraction involving <code>cw</code> in REPL/GC status reporting.</li>
+          <li><code>slib.c:1031</code>, <code>slib.c:1044</code>, <code>slib.c:1072</code>, and <code>slib.c:1290</code>: analyzer reports around heap/GC storage.</li>
+          <li><code>slib.c:1401</code>: dead store from <code>ptr = (*p-&gt;gc_mark)(ptr)</code>, left for a separate GC hook semantics pass.</li>
+        </ul>
+      </section>
+
+      <section id="commits">
+        <h2>Commits Covered</h2>
+        <ul>
+          <li><code>0bf036f Add clang-tidy config and LLVM aliases</code></li>
+          <li><code>11bbd19 Guard strcons against null inferred length</code></li>
+          <li><code>3005f6c Remove unused dead stores</code></li>
+          <li><code>ba886d0 Document varargs analyzer false positives</code></li>
+          <li><code>3b30052 Clean up local analyzer dead stores</code></li>
+          <li><code>0250741 Add Meson version floor and macOS clang-tidy SDKROOT setup</code></li>
+          <li><code>a8c57a8 Free temporary -m argument in siod_main</code></li>
+        </ul>
+        <p>Excluded: <code>58f614f set tabsize for old C code</code>.</p>
+      </section>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-toml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>
