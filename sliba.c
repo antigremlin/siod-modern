@@ -87,7 +87,9 @@ void array_gc_free(LISP ptr)
       free(ptr->storage_as.long_array.data);
       break;
     case tc_lisp_array:
-      free(ptr->storage_as.lisp_array.data);
+      free((void *)ptr->storage_as.lisp_array.data);
+      break;
+    default:
       break;}}
 
 void array_prin1(LISP ptr,struct gen_printio *f)
@@ -103,7 +105,7 @@ void array_prin1(LISP ptr,struct gen_printio *f)
 	 char cbuff[3];
 	 n = strlen(ptr->storage_as.string.data);
 	 for(j=0;j<n;++j)
-	   switch(c = ptr->storage_as.string.data[j])
+	   switch(c = (unsigned char)ptr->storage_as.string.data[j])
 	     {case '\\':
 	      case '"':
 		cbuff[0] = '\\';
@@ -159,6 +161,8 @@ void array_prin1(LISP ptr,struct gen_printio *f)
 	 if ((j + 1) < ptr->storage_as.lisp_array.dim)
 	   gput_st(f," ");}
       gput_st(f,")");
+      break;
+    default:
       break;}}
 
 LISP strcons(long length,const char *data)
@@ -520,7 +524,9 @@ LISP lreadstring(struct gen_readio *f)
 	       else
 		 {UNGETC_FCN(c,f);
 		  break;}}
-	    c = n;}}
+	    c = n;
+	  default:
+	    break;}}
     if ((j + 1) >= TKBUFFERN) err("read string overflow",NIL);
     ++j;
     *p++ = c;}
@@ -864,7 +870,9 @@ LISP fast_read(LISP table)
 	  {case EOF:
 	     return(table);
 	   case '\n':
-	     return(fast_read(table));}
+	     return(fast_read(table));
+	   default:
+	     break;}
     case FO_fetch:
       len = get_long(f);
       FLONM(bashnum) = len;
@@ -1189,7 +1197,8 @@ LISP string2number(LISP x,LISP b)
  return(flocons(result));}
 
 LISP lstrcmp(LISP s1,LISP s2)
-{return(flocons(strcmp(get_c_string(s1),get_c_string(s2))));}
+{/* NOLINTNEXTLINE(bugprone-suspicious-string-compare): the Scheme primitive returns strcmp's ordering value. */
+ return(flocons(strcmp(get_c_string(s1),get_c_string(s2))));}
 
 void chk_string(LISP s,char **data,long *dim)
 {if TYPEP(s,tc_string)
@@ -1264,10 +1273,10 @@ static void init_base64_table(void)
 
 #define BITMSK(N) ((1 << (N)) - 1)
 
-#define ITEM1(X)   (X >> 2) & BITMSK(6)
-#define ITEM2(X,Y) ((X & BITMSK(2)) << 4) | ((Y >> 4) & BITMSK(4))
-#define ITEM3(X,Y) ((X & BITMSK(4)) << 2) | ((Y >> 6) & BITMSK(2))
-#define ITEM4(X)   X & BITMSK(6)
+#define ITEM1(X)   (((X) >> 2) & BITMSK(6))
+#define ITEM2(X,Y) ((((X) & BITMSK(2)) << 4) | (((Y) >> 4) & BITMSK(4)))
+#define ITEM3(X,Y) ((((X) & BITMSK(4)) << 2) | (((Y) >> 6) & BITMSK(2)))
+#define ITEM4(X)   ((X) & BITMSK(6))
 
 LISP base64encode(LISP in)
 {char *s,*t = base64_encode_table;
@@ -1305,7 +1314,8 @@ LISP base64encode(LISP in)
  return(out);}
 
 LISP base64decode(LISP in)
-{char *s,*t = base64_decode_table;
+{char *s;
+ unsigned char *t = (unsigned char *)base64_decode_table;
  LISP out;
  unsigned char *p1,*p2;
  long j,m,n,chunks,leftover,item1,item2,item3,item4;

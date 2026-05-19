@@ -3,7 +3,14 @@ Checks: >
   clang-diagnostic-*,
   clang-analyzer-*,
   modernize-*,
+  bugprone-*,
   -modernize-use-nullptr,
+  -bugprone-assignment-in-if-condition,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-integer-division,
+  -bugprone-narrowing-conversions,
+  -bugprone-signal-handler,
+  -bugprone-unchecked-string-to-number-conversion,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   -clang-analyzer-security.insecureAPI.rand
 WarningsAsErrors: ''

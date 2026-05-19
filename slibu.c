@@ -123,6 +123,7 @@ LISP lsystem(LISP args)
 {int retval;
  long iflag;
  iflag = no_interrupt(1);
+ /* NOLINTNEXTLINE(bugprone-command-processor): this is the implementation of SIOD's system primitive. */
  retval = system(get_c_string(string_append(args)));
  no_interrupt(iflag);
  if (retval < 0)
@@ -430,10 +431,10 @@ char **list2char(LISP *safe,LISP v)
  long j,n;
  LISP l;
  n = get_c_long(llength(v));
- *safe = cons(mallocl(&x,sizeof(char *) * (n + 1)),*safe);
+ *safe = cons(mallocl((void *)&x,sizeof(char *) * (n + 1)),*safe);
  for(l=v,j=0;j<n;l=cdr(l),++j)
    {tmp = get_c_string(car(l));
-    *safe = cons(mallocl(&x[j],strlen(tmp)+1),*safe);
+    *safe = cons(mallocl((void *)&x[j],strlen(tmp)+1),*safe);
     strcpy(x[j],tmp);}
  x[n] = NULL;
  return(x);}
@@ -1079,9 +1080,7 @@ LISP gsetlk(int op,LISP lfd,LISP ltype,LISP whence,LISP start,LISP len)
  f.l_pid = 0;
  if (fcntl(fd,op,&f) == -1)
    return(llast_c_errmsg(-1));
- else if (op != F_GETLK)
-   return(NIL);
- else if (f.l_type == F_UNLCK)
+ else if ((op != F_GETLK) || (f.l_type == F_UNLCK))
    return(NIL);
  else
    return(listn(2,flocons(f.l_type),flocons(f.l_pid)));}
@@ -1255,9 +1254,9 @@ LISP http_date(LISP value)
  if (!(t = gmtime(&b))) return(NIL);
  (sprintf
   (buff,"%s, %02d %s %04d %02d:%02d:%02d GMT",
-   &"Sun\0Mon\0Tue\0Wed\0Thu\0Fri\0Sat"[t->tm_wday*4],
+   &"Sun\0Mon\0Tue\0Wed\0Thu\0Fri\0Sat"[(size_t)t->tm_wday * 4],
    t->tm_mday,
-   &"Jan\0Feb\0Mar\0Apr\0May\0Jun\0Jul\0Aug\0Sep\0Oct\0Nov\0Dec"[t->tm_mon*4],
+   &"Jan\0Feb\0Mar\0Apr\0May\0Jun\0Jul\0Aug\0Sep\0Oct\0Nov\0Dec"[(size_t)t->tm_mon * 4],
    t->tm_year+1900,
    t->tm_hour,
    t->tm_min,
@@ -1336,7 +1335,8 @@ LISP lsleep(LISP ns)
  return(NIL);}
 
 LISP url_encode(LISP in)
-{int spaces=0,specials=0,regulars=0,c;
+{int spaces=0,specials=0,regulars=0;
+ unsigned char c;
  char *str = get_c_string(in),*p,*r;
  LISP out;
  for(p=str,spaces=0,specials=0,regulars=0;(c = *p);++p)
@@ -1350,21 +1350,23 @@ LISP url_encode(LISP in)
    if (c == ' ')
      *r++ = '+';
    else if (!(isalnum(c) || strchr("*-._@",c)))
-     {sprintf(r,"%%%02X",c & 0xFF);
+     {sprintf(r,"%%%02X",(unsigned int)c);
       r += 3;}
    else
-     *r++ = c;
+     *r++ = (char)c;
  *r = 0;
  return(out);}
 
 LISP url_decode(LISP in)
-{int pluses=0,specials=0,regulars=0,c,j;
+{int pluses=0,specials=0,regulars=0,j;
+ unsigned int value;
+ unsigned char c;
  char *str = get_c_string(in),*p,*r;
  LISP out;
  for(p=str,pluses=0,specials=0,regulars=0;(c = *p);++p)
    if (c == '+') ++pluses;
    else if (c == '%')
-     {if (isxdigit(p[1]) && isxdigit(p[2]))
+     {if (isxdigit((unsigned char)p[1]) && isxdigit((unsigned char)p[2]))
 	++specials;
       else
 	return(NIL);}
@@ -1377,14 +1379,14 @@ LISP url_decode(LISP in)
    if (c == '+')
      *r++ = ' ';
    else if (c == '%')
-     {for(*r = 0,j=1;j<3;++j)
-	*r = *r * 16 + ((isdigit(p[j]))
-			? (p[j] - '0')
-			: (toupper(p[j]) - 'A' + 10));
+     {for(value=0,j=1;j<3;++j)
+	value = value * 16 + ((isdigit((unsigned char)p[j]))
+			      ? (p[j] - '0')
+			      : (toupper((unsigned char)p[j]) - 'A' + 10));
       p += 2;
-      ++r;}
+      *r++ = (char)value;}
    else
-     *r++ = c;
+     *r++ = (char)c;
  *r = 0;
  return(out);}
 
@@ -1944,25 +1946,25 @@ LISP datlength(LISP dat,LISP ctype)
  get_c_string_dim(dat,&size);
  switch(get_c_long(ctype))
    {case CTYPE_FLOAT:
-      return(flocons(size / sizeof(float)));
+      return(flocons((double)(size / sizeof(float))));
     case CTYPE_DOUBLE:
-      return(flocons(size / sizeof(double)));
+      return(flocons((double)(size / sizeof(double))));
     case CTYPE_LONG:
-      return(flocons(size / sizeof(long)));
+      return(flocons((double)(size / sizeof(long))));
     case CTYPE_SHORT:
-      return(flocons(size / sizeof(short)));
+      return(flocons((double)(size / sizeof(short))));
     case CTYPE_CHAR:
-      return(flocons(size / sizeof(char)));
+      return(flocons((double)(size / sizeof(char))));
     case CTYPE_INT:
-      return(flocons(size / sizeof(int)));
+      return(flocons((double)(size / sizeof(int))));
     case CTYPE_ULONG:
-      return(flocons(size / sizeof(unsigned long)));
+      return(flocons((double)(size / sizeof(unsigned long))));
     case CTYPE_USHORT:
-      return(flocons(size / sizeof(unsigned short)));
+      return(flocons((double)(size / sizeof(unsigned short))));
     case CTYPE_UCHAR:
-      return(flocons(size / sizeof(unsigned char)));
+      return(flocons((double)(size / sizeof(unsigned char))));
     case CTYPE_UINT:
-      return(flocons(size / sizeof(unsigned int)));
+      return(flocons((double)(size / sizeof(unsigned int))));
     default:
       return(err("unknown CTYPE",ctype));}}
 

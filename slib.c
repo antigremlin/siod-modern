@@ -892,11 +892,9 @@ LISP eq(LISP x,LISP y)
 {if EQ(x,y) return(sym_t); else return(NIL);}
 
 LISP eql(LISP x,LISP y)
-{if EQ(x,y) return(sym_t); else 
- if NFLONUMP(x) return(NIL); else
- if NFLONUMP(y) return(NIL); else
- if (FLONM(x) == FLONM(y)) return(sym_t);
- return(NIL);}
+{if EQ(x,y) return(sym_t);
+ if (NFLONUMP(x) || NFLONUMP(y)) return(NIL);
+ return((FLONM(x) == FLONM(y)) ? sym_t : NIL);}
 
 LISP symcons(char *pname,LISP vcell)
 {LISP z;
@@ -1330,6 +1328,7 @@ void gc_mark_and_sweep(void)
    {heap->type = tc_free_cell;
     heap->gc_mark = 0;
     ++heap;}
+ /* NOLINTNEXTLINE(bugprone-unused-return-value): used only to spill registers for GC marking. */
  setjmp(save_regs_gc_mark);
  mark_locations((LISP *) save_regs_gc_mark,
 		(LISP *) (((char *) save_regs_gc_mark) + sizeof(save_regs_gc_mark)));
@@ -1630,6 +1629,8 @@ LISP leval(LISP x,LISP env)
 	   break;
 	 case tc_cons:
 	   tmp = leval(tmp,env);
+	   break;
+	 default:
 	   break;}
       switch TYPE(tmp)
 	{case tc_subr_0:
@@ -2483,7 +2484,7 @@ LISP lputc(LISP c,LISP p)
  if FLONUMP(c)
    i = (int)FLONM(c);
  else
-   i = *get_c_string(c);
+   i = (unsigned char)*get_c_string(c);
  flag = no_interrupt(1);
  putc(i,f);
  no_interrupt(flag);

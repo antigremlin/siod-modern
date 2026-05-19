@@ -50,7 +50,8 @@ struct gc_protected
 
 #define NEWCELL(_into,_type)          \
 {if (gc_kind_copying == 1)            \
-   {if ((_into = heap) >= heap_end)   \
+   {_into = heap;                     \
+    if (_into >= heap_end)            \
       gc_fatal_error();               \
     heap = _into+1;}                  \
  else                                 \
@@ -205,4 +206,3 @@ LISP gc_info(LISP);
 LISP err_closure_code(LISP tmp);
 
 #define VLOAD_OFFSET_HACK_CHAR '|'
-
