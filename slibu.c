@@ -580,7 +580,7 @@ LISP lputenv(LISP lstr)
  orig = get_c_string(lstr);
  /* unix putenv keeps a pointer to the string we pass,
     therefore we must make a fresh copy, which is memory leaky. */
- cpy = (char *) must_malloc(strlen(orig)+1);
+ cpy = must_malloc(strlen(orig)+1);
  strcpy(cpy,orig);
   if (putenv(cpy))
    return(err("putenv",llast_c_errmsg(-1)));
@@ -1913,7 +1913,7 @@ LISP datref(LISP dat,LISP ctype,LISP ind)
       return(flocons(((short *)data)[i]));
     case CTYPE_CHAR:
       if (((i+1) * (int) sizeof(char)) > size) err_large_index(ind);
-      return(flocons(((char *)data)[i]));
+      return(flocons(data[i]));
     case CTYPE_INT:
       if (((i+1) * (int) sizeof(int)) > size) err_large_index(ind);
       return(flocons(((int *)data)[i]));
@@ -2328,7 +2328,7 @@ void __stdcall init_slibu(void)
 #ifdef unix
  if ((!(tmp1 = getenv(ld_library_path_env))) ||
      (!strstr(tmp1,siod_lib)))
-   {tmp2 = (char *) must_malloc(strlen(ld_library_path_env) + 1 +
+   {tmp2 = must_malloc(strlen(ld_library_path_env) + 1 +
 				((tmp1) ? strlen(tmp1) + 1 : 0) +
 				strlen(siod_lib) + 1);
     sprintf(tmp2,"%s=%s%s%s",

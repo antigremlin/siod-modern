@@ -953,7 +953,7 @@ LISP gen_intern(char *name,long copyp)
      {no_interrupt(flag);
       return(CAR(l));}
  if (copyp == 1)
-   {cname = (char *) must_malloc(strlen(name)+1);
+   {cname = must_malloc(strlen(name)+1);
     strcpy(cname,name);}
  else
    cname = name;
@@ -1024,7 +1024,7 @@ void __stdcall init_storage(void)
 void init_storage_1(void)
 {LISP ptr;
  long j;
- tkbuffer = (char *) must_malloc(TKBUFFERN+1);
+ tkbuffer = must_malloc(TKBUFFERN+1);
  if (((gc_kind_copying == 1) && (nheaps != 2)) || (nheaps < 1))
    err("invalid number of heaps",NIL);
  heaps = (LISP *) must_malloc(sizeof(LISP) * nheaps);
@@ -1334,8 +1334,8 @@ void gc_mark_and_sweep(void)
  mark_locations((LISP *) save_regs_gc_mark,
 		(LISP *) (((char *) save_regs_gc_mark) + sizeof(save_regs_gc_mark)));
  mark_protected_registers();
- mark_locations((LISP *) stack_start_ptr,
-		(LISP *) &stack_end);
+ mark_locations(stack_start_ptr,
+		&stack_end);
 #ifdef THINK_C
  mark_locations((LISP *) ((char *) stack_start_ptr + 2),
 		(LISP *) ((char *) &stack_end + 2));
@@ -2274,7 +2274,7 @@ LISP fopen_cg(FILE *(*fcn)(const char *,const char *),char *name,char *how)
    {SAFE_STRCPY(errmsg,"could not open ");
     SAFE_STRCAT(errmsg,name);
     err(errmsg,llast_c_errmsg(-1));}
- sym->storage_as.c_file.name = (char *) must_malloc(strlen(name)+1);
+ sym->storage_as.c_file.name = must_malloc(strlen(name)+1);
  strcpy(sym->storage_as.c_file.name,name);
  no_interrupt(flag);
  return(sym);}
@@ -2754,4 +2754,3 @@ void pr(LISP p)
 void prp(LISP *p)
 {if (!p) return;
  pr(*p);}
-

@@ -29,23 +29,24 @@ documentation and/or software.
  */
 
 
-
-#define S11 7
-#define S12 12
-#define S13 17
-#define S14 22
-#define S21 5
-#define S22 9
-#define S23 14
-#define S24 20
-#define S31 4
-#define S32 11
-#define S33 16
-#define S34 23
-#define S41 6
-#define S42 10
-#define S43 15
-#define S44 21
+enum {
+  S11 = 7,
+  S12 = 12,
+  S13 = 17,
+  S14 = 22,
+  S21 = 5,
+  S22 = 9,
+  S23 = 14,
+  S24 = 20,
+  S31 = 4,
+  S32 = 11,
+  S33 = 16,
+  S34 = 23,
+  S41 = 6,
+  S42 = 10,
+  S43 = 15,
+  S44 = 21
+};
 
 static void MD5Transform PROTO_LIST ((UINT4 [4], unsigned char [64]));
 static void Encode PROTO_LIST
@@ -317,4 +318,3 @@ static void MD5_memset(POINTER output, int value, unsigned int len)
   for (i = 0; i < len; i++)
  ((char *)output)[i] = (char)value;
 }
-

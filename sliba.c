@@ -311,13 +311,13 @@ LISP arcons(long typecode,long n,long initp)
       break;
     case tc_string:
       a->storage_as.string.dim = n;
-      a->storage_as.string.data = (char *) must_malloc(n+1);
+      a->storage_as.string.data = must_malloc(n+1);
       a->storage_as.string.data[n] = 0;
       if (initp)
 	for(j=0;j<n;++j) a->storage_as.string.data[j] = ' ';
     case tc_byte_array:
       a->storage_as.string.dim = n;
-      a->storage_as.string.data = (char *) must_malloc(n);
+      a->storage_as.string.data = must_malloc(n);
       if (initp)
 	for(j=0;j<n;++j) a->storage_as.string.data[j] = 0;
       break;
@@ -365,13 +365,13 @@ LISP cons_array(LISP dim,LISP kind)
  else if EQ(cintern("string"),kind)
    {a->type = tc_string;
     a->storage_as.string.dim = n;
-    a->storage_as.string.data = (char *) must_malloc(n+1);
+    a->storage_as.string.data = must_malloc(n+1);
     a->storage_as.string.data[n] = 0;
     for(j=0;j<n;++j) a->storage_as.string.data[j] = ' ';}
  else if EQ(cintern("byte"),kind)
    {a->type = tc_byte_array;
     a->storage_as.string.dim = n;
-    a->storage_as.string.data = (char *) must_malloc(n);
+    a->storage_as.string.data = must_malloc(n);
     for(j=0;j<n;++j) a->storage_as.string.data[j] = 0;}
  else if (EQ(cintern("lisp"),kind) || NULLP(kind))
    {a->type = tc_lisp_array;
@@ -966,7 +966,7 @@ LISP array_fast_read(int code,LISP table)
       ptr = newcell(tc_byte_array);
       ptr->storage_as.string.dim = len;
       ptr->storage_as.string.data =
-	(char *) must_malloc(len);
+	must_malloc(len);
       fread(ptr->storage_as.string.data,len,1,f);
       no_interrupt(iflag);
       return(ptr);
@@ -1034,7 +1034,7 @@ LISP lfread(LISP size,LISP file)
       break;
     default:
       n = get_c_long(size);
-      buffer = (char *) must_malloc(n+1);
+      buffer = must_malloc(n+1);
       buffer[n] = 0;
       m = 1;}
  ret = fread(buffer,1,n,f);
