@@ -9,6 +9,9 @@ Array-hacking code moved to another source file.
 
 #include <stdio.h>
 #include <string.h>
+#if !defined(WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+#include <strings.h>
+#endif
 #include <setjmp.h>
 #include <stdlib.h>
 #include <stdarg.h>

@@ -2,7 +2,7 @@ project('siod', 'c',
   version : '3.6',
   meson_version : '>=1.9.0',
   default_options : [
-    'c_std=c23',
+    'c_std=c23,c2x',
     'warning_level=2',
     'buildtype=debugoptimized',
   ],
@@ -17,8 +17,13 @@ common_deps = []
 if host_machine.system() == 'windows'
   common_c_args += ['-DWIN32']
 else
-  common_c_args += ['-Dunix']
+  common_c_args += ['-Dunix', '-D_DEFAULT_SOURCE']
   common_deps += cc.find_library('dl', required : false)
+endif
+
+if host_machine.system() == 'linux'
+  common_c_args += ['-Dlinux', '-D_GNU_SOURCE']
+  common_deps += cc.find_library('crypt', required : false)
 endif
 
 common_deps += cc.find_library('m', required : false)
