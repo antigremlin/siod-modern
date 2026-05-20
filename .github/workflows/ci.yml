@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.compiler }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            cc: gcc
+          - compiler: clang
+            cc: clang
+    env:
+      CC: ${{ matrix.cc }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build gcc clang
+      - name: Configure
+        run: meson setup build
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+  windows-msys2:
+    name: Windows MSYS2 ${{ matrix.msystem }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - msystem: UCRT64
+            toolchain: mingw-w64-ucrt-x86_64-toolchain
+            package_prefix: mingw-w64-ucrt-x86_64
+            cc: gcc
+          - msystem: CLANG64
+            toolchain: mingw-w64-clang-x86_64-toolchain
+            package_prefix: mingw-w64-clang-x86_64
+            cc: clang
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: >-
+            ${{ matrix.toolchain }}
+            ${{ matrix.package_prefix }}-meson
+            ${{ matrix.package_prefix }}-ninja
+      - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+        run: meson setup build
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: meson test -C build --print-errorlogs
