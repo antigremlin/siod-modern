@@ -9,21 +9,24 @@ project('siod', 'c',
 )
 
 cc = meson.get_compiler('c')
+host_system = host_machine.system()
 
 common_c_args = []
 common_deps = []
 
 # Preserve the legacy platform guards while the source is being modernized.
-if host_machine.system() == 'windows'
+if host_system == 'windows'
   common_c_args += ['-DWIN32']
 else
+  # POSIX-family hosts need feature macros in strict C mode so legacy Unix
+  # extension declarations remain visible.
   common_c_args += ['-Dunix', '-D_DEFAULT_SOURCE']
   common_deps += cc.find_library('dl', required : false)
-endif
 
-if host_machine.system() == 'linux'
-  common_c_args += ['-Dlinux', '-D_GNU_SOURCE']
-  common_deps += cc.find_library('crypt', required : false)
+  if host_system == 'linux'
+    common_c_args += ['-Dlinux', '-D_GNU_SOURCE']
+    common_deps += cc.find_library('crypt', required : false)
+  endif
 endif
 
 common_deps += cc.find_library('m', required : false)
