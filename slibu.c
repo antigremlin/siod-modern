@@ -154,7 +154,9 @@ LISP lcrypt(LISP key,LISP salt)
 
 #if defined(WIN32)
 #define getcwd _getcwd
+#ifndef PATH_MAX
 #define PATH_MAX _MAX_PATH
+#endif
 #endif
 
 LISP lgetcwd(void)

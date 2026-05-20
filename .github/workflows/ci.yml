@@ -26,7 +26,11 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y meson ninja-build gcc clang
+          sudo apt-get install -y pipx ninja-build gcc clang
+          pipx install 'meson>=1.9.0'
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+          meson --version
       - name: Configure
         run: meson setup build
       - name: Build
