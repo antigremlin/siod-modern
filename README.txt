@@ -16,6 +16,9 @@ Support files and extensions
 
 Building: 
 
+For the modern supported platform matrix, see SUPPORTED_PLATFORMS.md.
+The notes below are historical and describe the original distribution.
+
   unix .... the makefile has different targets for common
             operating system variants, and has been tested on all systems
             included in file.

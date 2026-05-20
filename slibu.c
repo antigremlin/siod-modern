@@ -61,8 +61,8 @@
 #include <fcntl.h>
 #endif
 
-#if defined(linux) && defined(PPC)
-/* I know, this should be defined(NEED_CRYPT_H) */
+#if defined(linux)
+#include <limits.h>
 #include <crypt.h>
 #endif
 
@@ -154,7 +154,9 @@ LISP lcrypt(LISP key,LISP salt)
 
 #if defined(WIN32)
 #define getcwd _getcwd
+#ifndef PATH_MAX
 #define PATH_MAX _MAX_PATH
+#endif
 #endif
 
 LISP lgetcwd(void)

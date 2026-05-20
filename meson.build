@@ -2,16 +2,34 @@ project('siod', 'c',
   version : '3.6',
   meson_version : '>=1.9.0',
   default_options : [
-    'c_std=c23',
+    'c_std=c23,c2x',
     'warning_level=2',
     'buildtype=debugoptimized',
   ],
 )
 
 cc = meson.get_compiler('c')
+host_system = host_machine.system()
 
-# On macOS, 'unix' is not predefined; the code guards POSIX includes with it.
-common_c_args = ['-Dunix']
+common_c_args = []
+common_deps = []
+
+# Preserve the legacy platform guards while the source is being modernized.
+if host_system == 'windows'
+  common_c_args += ['-DWIN32']
+else
+  # POSIX-family hosts need feature macros in strict C mode so legacy Unix
+  # extension declarations remain visible.
+  common_c_args += ['-Dunix', '-D_DEFAULT_SOURCE']
+  common_deps += cc.find_library('dl', required : false)
+
+  if host_system == 'linux'
+    common_c_args += ['-Dlinux', '-D_GNU_SOURCE']
+    common_deps += cc.find_library('crypt', required : false)
+  endif
+endif
+
+common_deps += cc.find_library('m', required : false)
 
 # Sanitizers (enable with -Dsanitize=true)
 if get_option('sanitize')
@@ -28,11 +46,18 @@ libsiod = static_library('siod',
   'slibu.c',
   'md5.c',
   c_args : common_c_args,
+  dependencies : common_deps,
 )
 
 # Main executable
-executable('siod',
+siod_exe = executable('siod',
   'siod.c',
   c_args : common_c_args,
+  dependencies : common_deps,
   link_with : libsiod,
+)
+
+test('core-suite', siod_exe,
+  args : ['test-suite.scm'],
+  workdir : meson.project_source_root(),
 )

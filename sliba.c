@@ -9,6 +9,9 @@ Array-hacking code moved to another source file.
 
 #include <stdio.h>
 #include <string.h>
+#if !defined(WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+#include <strings.h>
+#endif
 #include <setjmp.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -1993,9 +1996,10 @@ LISP substring_equal(LISP str1,LISP str2,LISP start,LISP end)
    return(NIL);
  return((memcmp(cstr1,&cstr2[s],e-s) == 0) ? a_true_value() : NIL);}
 
-#if defined(vms) || defined(WIN32)
-int strncasecmp(const char *s1, const char *s2, int n)
-{int j,c1,c2;
+#if defined(vms) || (defined(WIN32) && !defined(__MINGW32__) && !defined(__MINGW64__))
+int strncasecmp(const char *s1, const char *s2, size_t n)
+{size_t j;
+ int c1,c2;
  for(j=0;j<n;++j)
      {c1 = toupper(s1[j]);
     c2 = toupper(s2[j]);
@@ -2003,7 +2007,7 @@ int strncasecmp(const char *s1, const char *s2, int n)
     if (c1 == 0) return(-1);
     if (c2 == 0) return(1);
     if (c1 < c2) return(-1);
-    if (c2 > c1) return(1);}
+    if (c1 > c2) return(1);}
  return(0);}
 #endif
 
